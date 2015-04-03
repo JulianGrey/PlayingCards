@@ -9,16 +9,15 @@ using namespace std;
 
 class Card {
   public:
-	int suit, value;
-	string strSuit, strValue, colour;
-	void setValues(int a, int b, string c, string s, string v) {
-		suit = a;
-		value = b;
+	int value;
+	string suit, strValue, colour;
+	void setValues(int a, string c, string s, string v) {
+		value = a;
 		colour = c;
-		strSuit = s;
+		suit = s;
 		strValue = v;
 	}
-	string printName() { return strValue + " of " + strSuit; }
+	string printName() { return strValue + " of " + suit; }
 };
 
 string wordify(int value) {
@@ -57,8 +56,16 @@ Card * buildDeck(Card deck[]) {
 		}
 		for(unsigned j = 1; j < 14; j++) {
 			card = new Card;
+			int * value = new int;
 			*strValue = wordify(j);
-			card->setValues(i, j, *colour, *strSuit, *strValue);
+			if(j > 10) {
+				*value = 10;
+			}
+			//else if(j == 1) {} // Functionality for Aces
+			else {
+				*value = j;
+			}
+			card->setValues(*value, *colour, *strSuit, *strValue);
 			deck[*counter] = *card;
 			(*counter)++;
 			delete card;
@@ -80,33 +87,74 @@ vector<Card> * resetDeck(Card deck[]) {
 	return vDeck;
 }
 
-void pickRandomCard(Card deck[]) {
+void playBlackJack(Card deck[]) {
 	Card * chosenCard = new Card;
 	vector<Card> * vDeck = resetDeck(deck);
+	vector<Card> * cpuHand = new vector<Card>;
+	vector<Card> * playerHand = new vector<Card>;
+	int * cpuScore = new int;
+	int * playerScore = new int;
+	*cpuScore = *playerScore = 0;
+
 	std::mt19937 * rng = new mt19937;
 	(*rng).seed(std::random_device()());
 
-	std::uniform_int_distribution<std::mt19937::result_type> distDeck(0, (*vDeck).size() - 1);
+	// Deal cards
+	for(unsigned i = 0; i < 4; i++) {
+		std::uniform_int_distribution<std::mt19937::result_type> distDeck(0, (*vDeck).size() - 1);
+		*chosenCard = (*vDeck).at(distDeck(*rng));
 
-	*chosenCard = (*vDeck).at(distDeck(*rng));
-
-	cout << "Chosen card: " << (*chosenCard).printName() << '\n';
-	for(unsigned i = 0; i < (*vDeck).size(); i++) {
-		if((*vDeck).at(i).printName() == (*chosenCard).printName()) {
-			(*vDeck).erase((*vDeck).begin() + i);
-			break;
+		if(i % 2 == 0) {
+			(*cpuHand).push_back(*chosenCard);
+			*cpuScore += (*chosenCard).value;
+			for(unsigned j = 0; j < (*vDeck).size(); j++) {
+				if((*vDeck).at(j).printName() == (*chosenCard).printName()) {
+					(*vDeck).erase((*vDeck).begin() + j);
+					break;
+				}
+			}
+		}
+		else {
+			(*playerHand).push_back(*chosenCard);
+			*playerScore += (*chosenCard).value;
+			for(unsigned j = 0; j < (*vDeck).size(); j++) {
+				if((*vDeck).at(j).printName() == (*chosenCard).printName()) {
+					(*vDeck).erase((*vDeck).begin() + j);
+					break;
+				}
+			}
 		}
 	}
-	std::cout << "\n\n";
-	for(unsigned i = 0; i < (*vDeck).size(); i++) {
-		cout << (*vDeck).at(i).printName() << '\n';
+
+	std::cout << "CPU cards: ";
+	for(unsigned i = 0; i < (*cpuHand).size(); i++) {
+		if(i != 0) {
+			std::cout << " and ";
+		}
+		std::cout << (*cpuHand).at(i).printName();
 	}
+	std::cout << " (score: " << *cpuScore << ")";
+	std::cout << "\nPlayer cards: ";
+
+	for(unsigned i = 0; i < (*playerHand).size(); i++) {
+		if(i != 0) {
+			std::cout << " and ";
+		}
+		std::cout << (*playerHand).at(i).printName();
+	}
+	std::cout << " (score: " << *playerScore << ")";
+	std::cout << "\n\n";
+
+	// Debug listing remaining cards in deck
+	/*for(unsigned i = 0; i < (*vDeck).size(); i++) {
+		std::cout << (*vDeck).at(i).printName() << '\n';
+	}*/
 }
 
 int main() {
-	Card deck[52];
-	Card * pDeck = buildDeck(deck);
-	pickRandomCard(pDeck);
+	Card deck[52]; // Default deck
+	Card * pDeck = buildDeck(deck); // Dynamic deck. This will be used as cards are taken from the deck
+	playBlackJack(pDeck);
 
 	system("PAUSE");
 	return 0;
