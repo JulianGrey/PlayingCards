@@ -8,7 +8,7 @@
 using namespace std;
 
 class Card {
-public:
+  public:
 	int suit, value;
 	string strSuit, strValue, colour;
 	void setValues(int a, int b, string c, string s, string v) {
@@ -28,15 +28,13 @@ string wordify(int value) {
 	return strValue[value - 1];
 }
 
-int main() {
-	Card deck[52]; // Create a constant deck array
-	vector<Card> * vdeck = new vector<Card>;
+Card * buildDeck(Card deck[]) {
 	Card * card;
 	string * strValue = new string;
 	string * strSuit = new string;
 	string * colour = new string;
 	int * counter = new int;
-	*counter = 0;
+	(*counter) = 0;
 
 	for(unsigned i = 1; i < 5; i++) {
 		switch(i) {
@@ -61,37 +59,54 @@ int main() {
 			card = new Card;
 			*strValue = wordify(j);
 			card->setValues(i, j, *colour, *strSuit, *strValue);
-			(*vdeck).push_back(*card);
 			deck[*counter] = *card;
 			(*counter)++;
 			delete card;
 		}
 	}
 	delete colour;
+	delete counter;
 	delete strSuit;
 	delete strValue;
 
+	return deck;
+}
+
+vector<Card> * resetDeck(Card deck[]) {
+	vector<Card> * vDeck = new vector < Card > ;
+	for(unsigned i = 0; i < 52; i++) {
+		(*vDeck).push_back(deck[i]);
+	}
+	return vDeck;
+}
+
+void pickRandomCard(Card deck[]) {
 	Card * chosenCard = new Card;
+	vector<Card> * vDeck = resetDeck(deck);
 	std::mt19937 * rng = new mt19937;
 	(*rng).seed(std::random_device()());
-	*counter = 0;
 
-	std::uniform_int_distribution<std::mt19937::result_type> distDeck(0, (*vdeck).size() - 1);
+	std::uniform_int_distribution<std::mt19937::result_type> distDeck(0, (*vDeck).size() - 1);
 
-	*chosenCard = (*vdeck).at(distDeck(*rng));
+	*chosenCard = (*vDeck).at(distDeck(*rng));
 
-	cout << (distDeck(*rng)) << '\n';
-	cout << (*chosenCard).printName() << '\n';
-	for(unsigned i = 0; i < (*vdeck).size(); i++) {
-		if((*vdeck).at(i).printName() == (*chosenCard).printName()) {
-			(*vdeck).erase((*vdeck).begin() + i);
+	cout << "Chosen card: " << (*chosenCard).printName() << '\n';
+	for(unsigned i = 0; i < (*vDeck).size(); i++) {
+		if((*vDeck).at(i).printName() == (*chosenCard).printName()) {
+			(*vDeck).erase((*vDeck).begin() + i);
 			break;
 		}
 	}
-
-	for(unsigned i = 0; i < (*vdeck).size(); i++) {
-		cout << (*vdeck).at(i).printName() << '\n';
+	std::cout << "\n\n";
+	for(unsigned i = 0; i < (*vDeck).size(); i++) {
+		cout << (*vDeck).at(i).printName() << '\n';
 	}
+}
+
+int main() {
+	Card deck[52];
+	Card * pDeck = buildDeck(deck);
+	pickRandomCard(pDeck);
 
 	system("PAUSE");
 	return 0;
