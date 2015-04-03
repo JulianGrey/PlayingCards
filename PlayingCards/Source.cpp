@@ -58,13 +58,7 @@ Card * buildDeck(Card deck[]) {
 			card = new Card;
 			int * value = new int;
 			*strValue = wordify(j);
-			if(j > 10) {
-				*value = 10;
-			}
-			//else if(j == 1) {} // Functionality for Aces
-			else {
-				*value = j;
-			}
+			*value = j;
 			card->setValues(*value, *colour, *strSuit, *strValue);
 			deck[*counter] = *card;
 			(*counter)++;
@@ -106,7 +100,12 @@ void playBlackJack(Card deck[]) {
 
 		if(i % 2 == 0) {
 			(*cpuHand).push_back(*chosenCard);
-			*cpuScore += (*chosenCard).value;
+			if((*chosenCard).value > 10) {
+				*cpuScore += 10;
+			}
+			else {
+				*cpuScore += (*chosenCard).value;
+			}
 			for(unsigned j = 0; j < (*vDeck).size(); j++) {
 				if((*vDeck).at(j).printName() == (*chosenCard).printName()) {
 					(*vDeck).erase((*vDeck).begin() + j);
@@ -116,7 +115,12 @@ void playBlackJack(Card deck[]) {
 		}
 		else {
 			(*playerHand).push_back(*chosenCard);
-			*playerScore += (*chosenCard).value;
+			if((*chosenCard).value > 10) {
+				*playerScore += 10;
+			}
+			else {
+				*playerScore += (*chosenCard).value;
+			}
 			for(unsigned j = 0; j < (*vDeck).size(); j++) {
 				if((*vDeck).at(j).printName() == (*chosenCard).printName()) {
 					(*vDeck).erase((*vDeck).begin() + j);
