@@ -87,13 +87,14 @@ void playBlackJack(Card deck[]) {
 	vector<Card> * cpuHand = new vector<Card>;
 	vector<Card> * playerHand = new vector<Card>;
 	int * cpuScore = new int;
+	int * cpuScoreFC = new int; // Score of the first card in House's hand
 	int * playerScore = new int;
 	*cpuScore = *playerScore = 0;
 
 	std::mt19937 * rng = new mt19937;
 	(*rng).seed(std::random_device()());
 
-	// Deal cards
+	// Deal cards and calculate values
 	for(unsigned i = 0; i < 4; i++) {
 		std::uniform_int_distribution<std::mt19937::result_type> distDeck(0, (*vDeck).size() - 1);
 		*chosenCard = (*vDeck).at(distDeck(*rng));
@@ -102,9 +103,21 @@ void playBlackJack(Card deck[]) {
 			(*cpuHand).push_back(*chosenCard);
 			if((*chosenCard).value > 10) {
 				*cpuScore += 10;
+				if(i == 0) {
+					*cpuScoreFC = 10;
+				}
+			}
+			else if((*chosenCard).strValue == "Ace") {
+				(*cpuScore) += 11;
+				if(i == 0) {
+					*cpuScoreFC = 11;
+				}
 			}
 			else {
 				*cpuScore += (*chosenCard).value;
+				if(i == 0) {
+					*cpuScoreFC = (*chosenCard).value;
+				}
 			}
 			for(unsigned j = 0; j < (*vDeck).size(); j++) {
 				if((*vDeck).at(j).printName() == (*chosenCard).printName()) {
@@ -118,6 +131,9 @@ void playBlackJack(Card deck[]) {
 			if((*chosenCard).value > 10) {
 				*playerScore += 10;
 			}
+			else if((*chosenCard).strValue == "Ace") {
+				(*playerScore) += 11;
+			}
 			else {
 				*playerScore += (*chosenCard).value;
 			}
@@ -130,19 +146,13 @@ void playBlackJack(Card deck[]) {
 		}
 	}
 
-	std::cout << "CPU cards: ";
-	for(unsigned i = 0; i < (*cpuHand).size(); i++) {
-		if(i != 0) {
-			std::cout << " and ";
-		}
-		std::cout << (*cpuHand).at(i).printName();
-	}
-	std::cout << " (score: " << *cpuScore << ")";
-	std::cout << "\nPlayer cards: ";
+	std::cout << "House hand: " << (*cpuHand).at(0).printName();
+	std::cout << ", ??? (score: " << *cpuScoreFC << ")";
+	std::cout << "\nPlayer hand: ";
 
 	for(unsigned i = 0; i < (*playerHand).size(); i++) {
 		if(i != 0) {
-			std::cout << " and ";
+			std::cout << ", ";
 		}
 		std::cout << (*playerHand).at(i).printName();
 	}
