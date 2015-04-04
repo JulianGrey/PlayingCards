@@ -75,6 +75,7 @@ Temporary Items
 *.aps
 *.exe
 *.idb
+*.ilk
 *.ipch
 *.lastbuildstate
 *.lib
