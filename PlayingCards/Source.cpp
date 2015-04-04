@@ -86,9 +86,15 @@ void playBlackJack(Card deck[]) {
 	vector<Card> * vDeck = resetDeck(deck);
 	vector<Card> * cpuHand = new vector<Card>;
 	vector<Card> * playerHand = new vector<Card>;
+	char * option = new char;
+	int * turn = new int;
 	int * cpuScore = new int;
 	int * cpuScoreFC = new int; // Score of the first card in House's hand
 	int * playerScore = new int;
+
+	bool * selectDouble = new bool;
+	bool * selectSplit = new bool;
+
 	*cpuScore = *playerScore = 0;
 
 	std::mt19937 * rng = new mt19937;
@@ -158,6 +164,53 @@ void playBlackJack(Card deck[]) {
 	}
 	std::cout << " (score: " << *playerScore << ")";
 	std::cout << "\n\n";
+
+	// Gameplay
+	*turn = 1;
+	*selectDouble = false;
+	*selectSplit = false;
+
+	while(*turn == 1) {
+		std::cout << "What do you want to do?\n" << "([H]it, S[t]and, [D]ouble";
+		if((*playerHand).at(0).value == (*playerHand).at(1).value || (*playerHand).at(0).value >= 10 && (*playerHand).at(1).value >= 10) {
+			std::cout << ", S[p]lit";
+		}
+		std::cout << "): ";
+		std::cin >> *option;
+
+		switch(*option) {
+		case 'H':
+		case 'h':
+			std::cout << "Hit chosen\n";
+			(*turn)++;
+			break;
+		case 'T':
+		case 't':
+			std::cout << "Stand chosen\n";
+			(*turn)++;
+			break;
+		case 'D':
+		case 'd':
+			std::cout << "Double chosen\n";
+			*selectDouble = true;
+			(*turn)++;
+			break;
+		case 'P':
+		case 'p':
+			if((*playerHand).at(0).value == (*playerHand).at(1).value || (*playerHand).at(0).value >= 10 && (*playerHand).at(1).value >= 10) {
+				std::cout << "Split chosen\n";
+				*selectSplit = true;
+				(*turn)++;
+				break;
+			}
+			else {
+				std::cout << "Cannot split\n";
+			}
+		default:
+			std::cout << "Invalid option, choose again\n";
+			break;
+		}
+	}
 
 	// Debug listing remaining cards in deck
 	/*for(unsigned i = 0; i < (*vDeck).size(); i++) {
