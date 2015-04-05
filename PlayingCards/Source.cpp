@@ -124,6 +124,11 @@ void printPlayerHand(vector<Card> * hand, int * score) {
 	std::cout << " (score: " << *score << ")\n\n";
 }
 
+void printHouseHand(vector<Card> * hand, int * score) {
+	std::cout << "House hand: " << (*hand).at(0).printName();
+	std::cout << ", ??? (score: " << *score << ")";
+}
+
 void playBlackJack(Card deck[]) {
 	Card * chosenCard = new Card;
 	vector<Card> * vDeck = resetDeck(deck);
@@ -139,11 +144,16 @@ void playBlackJack(Card deck[]) {
 	bool * selectSplit = new bool;
 	bool * isPlayerTurn = new bool;
 
-	*houseInitScore = *playerScore = 0;
-
 	std::mt19937 * rng = new mt19937;
 	(*rng).seed(std::random_device()());
 
+	*turn = 1;
+	*isPlayerTurn = true;
+	*selectDouble = false;
+	*selectSplit = false;
+	*houseScore = *houseInitScore = *playerScore = 0;
+
+	// Gameplay
 	// Deal cards and calculate values
 	for(unsigned i = 0; i < 4; i++) {
 		randomCard(vDeck, chosenCard, rng);
@@ -155,16 +165,8 @@ void playBlackJack(Card deck[]) {
 			dealCard(vDeck, chosenCard, playerHand, playerScore, houseInitScore, i);
 		}
 	}
-
-	std::cout << "House hand: " << (*houseHand).at(0).printName();
-	std::cout << ", ??? (score: " << *houseInitScore << ")";
+	printHouseHand(houseHand, houseInitScore);
 	printPlayerHand(playerHand, playerScore);
-	
-	// Gameplay
-	*turn = 1;
-	*isPlayerTurn = true;
-	*selectDouble = false;
-	*selectSplit = false;
 
 	while(*turn == 1) {
 		if(*playerScore < 21) {
@@ -222,7 +224,7 @@ void playBlackJack(Card deck[]) {
 		}
 	}
 
-	while(*playerScore < 21 && *isPlayerTurn == true && *turn > 1) {
+	while(*turn > 1  && *playerScore < 21 && *isPlayerTurn == true) {
 		std::cout << "What do you want to do?\n" << "([H]it, [S]tand)" << '\n';
 		std::cin >> *option;
 		switch(*option) {
