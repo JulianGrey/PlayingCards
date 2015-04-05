@@ -81,6 +81,11 @@ vector<Card> * resetDeck(Card deck[]) {
 	return vDeck;
 }
 
+void randomCard(vector<Card> * deck, Card * card, std::mt19937 * rng) {
+	std::uniform_int_distribution<std::mt19937::result_type> distDeck(0, (*deck).size() - 1);
+	*card = (*deck).at(distDeck(*rng));
+}
+
 void dealCard(vector<Card> * deck, Card * card, vector<Card> * hand, int * score, int * houseInitScore, int cardDealNum) {
 	(*hand).push_back(*card);
 	if((*card).value > 10) {
@@ -130,8 +135,7 @@ void playBlackJack(Card deck[]) {
 
 	// Deal cards and calculate values
 	for(unsigned i = 0; i < 4; i++) {
-		std::uniform_int_distribution<std::mt19937::result_type> distDeck(0, (*vDeck).size() - 1);
-		*chosenCard = (*vDeck).at(distDeck(*rng));
+		randomCard(vDeck, chosenCard, rng);
 
 		if(i % 2 == 0) {
 			dealCard(vDeck, chosenCard, houseHand, houseScore, houseInitScore, i);
@@ -161,46 +165,67 @@ void playBlackJack(Card deck[]) {
 	*selectSplit = false;
 
 	while(*turn == 1) {
-		std::cout << "What do you want to do?\n" << "([H]it, S[t]and, [D]ouble";
-		if((*playerHand).at(0).value == (*playerHand).at(1).value || (*playerHand).at(0).value >= 10 && (*playerHand).at(1).value >= 10) {
-			std::cout << ", S[p]lit";
-		}
-		std::cout << "): ";
-		std::cin >> *option;
-
-		switch(*option) {
-		case 'H':
-		case 'h':
-			std::cout << "Hit chosen\n";
-			(*turn)++;
-			break;
-		case 'T':
-		case 't':
-			std::cout << "Stand chosen\n";
-			*isPlayerTurn = false;
-			(*turn)++;
-			break;
-		case 'D':
-		case 'd':
-			std::cout << "Double chosen\n";
-			*selectDouble = true;
-			*isPlayerTurn = false;
-			(*turn)++;
-			break;
-		case 'P':
-		case 'p':
+		if(*playerScore < 21) {
+			std::cout << "What do you want to do?\n" << "([H]it, S[t]and, [D]ouble";
 			if((*playerHand).at(0).value == (*playerHand).at(1).value || (*playerHand).at(0).value >= 10 && (*playerHand).at(1).value >= 10) {
-				std::cout << "Split chosen\n";
-				*selectSplit = true;
+				std::cout << ", S[p]lit";
+			}
+			std::cout << "): ";
+			std::cin >> *option;
+
+			switch(*option) {
+			case 'H':
+			case 'h':
+				std::cout << "Hit chosen\n";
+				randomCard(vDeck, chosenCard, rng);
+				dealCard(vDeck, chosenCard, playerHand, playerScore, houseInitScore, 0);
+				std::cout << "\nPlayer hand: ";
+
+				for(unsigned i = 0; i < (*playerHand).size(); i++) {
+					if(i != 0) {
+						std::cout << ", ";
+					}
+					std::cout << (*playerHand).at(i).printName();
+				}
+				std::cout << " (score: " << *playerScore << ")";
+				std::cout << "\n\n";
 				(*turn)++;
 				break;
+			case 'T':
+			case 't':
+				std::cout << "Stand chosen\n";
+				*isPlayerTurn = false;
+				(*turn)++;
+				break;
+			case 'D':
+			case 'd':
+				std::cout << "Double chosen\n";
+				*selectDouble = true;
+				*isPlayerTurn = false;
+				randomCard(vDeck, chosenCard, rng);
+				dealCard(vDeck, chosenCard, playerHand, playerScore, houseInitScore, 0);
+				std::cout << "\nPlayer hand: ";
+				(*turn)++;
+				break;
+			case 'P':
+			case 'p':
+				if((*playerHand).at(0).value == (*playerHand).at(1).value || (*playerHand).at(0).value >= 10 && (*playerHand).at(1).value >= 10) {
+					std::cout << "Split chosen\n";
+					*selectSplit = true;
+					(*turn)++;
+					break;
+				}
+				else {
+					std::cout << "Cannot split\n";
+				}
+			default:
+				std::cout << "Invalid option, choose again\n";
+				break;
 			}
-			else {
-				std::cout << "Cannot split\n";
-			}
-		default:
-			std::cout << "Invalid option, choose again\n";
-			break;
+		}
+		else {
+			std::cout << "21\n";
+			(*turn)++;
 		}
 	}
 
