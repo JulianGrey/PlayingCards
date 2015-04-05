@@ -81,21 +81,49 @@ vector<Card> * resetDeck(Card deck[]) {
 	return vDeck;
 }
 
+void dealCard(vector<Card> * deck, Card * card, vector<Card> * hand, int * score, int * houseInitScore, int cardDealNum) {
+	(*hand).push_back(*card);
+	if((*card).value > 10) {
+		*score += 10;
+		if(cardDealNum == 0) {
+			*houseInitScore += 10;
+		}
+	}
+	else if((*card).strValue == "Ace") {
+		*score += 11;
+		if(cardDealNum == 0) {
+			*houseInitScore += 11;
+		}
+	}
+	else {
+		*score += (*card).value;
+		if(cardDealNum == 0) {
+			*houseInitScore += (*card).value;
+		}
+	}
+	for(unsigned i = 0; i < (*deck).size(); i++) {
+		if((*deck).at(i).printName() == (*card).printName()) {
+			(*deck).erase((*deck).begin() + i);
+		}
+	}
+}
+
 void playBlackJack(Card deck[]) {
 	Card * chosenCard = new Card;
 	vector<Card> * vDeck = resetDeck(deck);
-	vector<Card> * cpuHand = new vector<Card>;
+	vector<Card> * houseHand = new vector<Card>;
 	vector<Card> * playerHand = new vector<Card>;
 	char * option = new char;
 	int * turn = new int;
-	int * cpuScore = new int;
-	int * cpuScoreFC = new int; // Score of the first card in House's hand
+	int * houseScore = new int;
+	int * houseInitScore = new int; // Score of the first card in House's hand
 	int * playerScore = new int;
 
 	bool * selectDouble = new bool;
 	bool * selectSplit = new bool;
+	bool * isPlayerTurn = new bool;
 
-	*cpuScore = *playerScore = 0;
+	*houseInitScore = *playerScore = 0;
 
 	std::mt19937 * rng = new mt19937;
 	(*rng).seed(std::random_device()());
@@ -106,54 +134,15 @@ void playBlackJack(Card deck[]) {
 		*chosenCard = (*vDeck).at(distDeck(*rng));
 
 		if(i % 2 == 0) {
-			(*cpuHand).push_back(*chosenCard);
-			if((*chosenCard).value > 10) {
-				*cpuScore += 10;
-				if(i == 0) {
-					*cpuScoreFC = 10;
-				}
-			}
-			else if((*chosenCard).strValue == "Ace") {
-				(*cpuScore) += 11;
-				if(i == 0) {
-					*cpuScoreFC = 11;
-				}
-			}
-			else {
-				*cpuScore += (*chosenCard).value;
-				if(i == 0) {
-					*cpuScoreFC = (*chosenCard).value;
-				}
-			}
-			for(unsigned j = 0; j < (*vDeck).size(); j++) {
-				if((*vDeck).at(j).printName() == (*chosenCard).printName()) {
-					(*vDeck).erase((*vDeck).begin() + j);
-					break;
-				}
-			}
+			dealCard(vDeck, chosenCard, houseHand, houseScore, houseInitScore, i);
 		}
 		else {
-			(*playerHand).push_back(*chosenCard);
-			if((*chosenCard).value > 10) {
-				*playerScore += 10;
-			}
-			else if((*chosenCard).strValue == "Ace") {
-				(*playerScore) += 11;
-			}
-			else {
-				*playerScore += (*chosenCard).value;
-			}
-			for(unsigned j = 0; j < (*vDeck).size(); j++) {
-				if((*vDeck).at(j).printName() == (*chosenCard).printName()) {
-					(*vDeck).erase((*vDeck).begin() + j);
-					break;
-				}
-			}
+			dealCard(vDeck, chosenCard, playerHand, playerScore, houseInitScore, i);
 		}
 	}
 
-	std::cout << "House hand: " << (*cpuHand).at(0).printName();
-	std::cout << ", ??? (score: " << *cpuScoreFC << ")";
+	std::cout << "House hand: " << (*houseHand).at(0).printName();
+	std::cout << ", ??? (score: " << *houseInitScore << ")";
 	std::cout << "\nPlayer hand: ";
 
 	for(unsigned i = 0; i < (*playerHand).size(); i++) {
@@ -167,6 +156,7 @@ void playBlackJack(Card deck[]) {
 
 	// Gameplay
 	*turn = 1;
+	*isPlayerTurn = true;
 	*selectDouble = false;
 	*selectSplit = false;
 
@@ -187,12 +177,14 @@ void playBlackJack(Card deck[]) {
 		case 'T':
 		case 't':
 			std::cout << "Stand chosen\n";
+			*isPlayerTurn = false;
 			(*turn)++;
 			break;
 		case 'D':
 		case 'd':
 			std::cout << "Double chosen\n";
 			*selectDouble = true;
+			*isPlayerTurn = false;
 			(*turn)++;
 			break;
 		case 'P':
