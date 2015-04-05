@@ -113,6 +113,17 @@ void dealCard(vector<Card> * deck, Card * card, vector<Card> * hand, int * score
 	}
 }
 
+void printPlayerHand(vector<Card> * hand, int * score) {
+	std::cout << "\nPlayer hand: ";
+	for(unsigned i = 0; i < (*hand).size(); i++) {
+		if(i != 0) {
+			std::cout << ", ";
+		}
+		std::cout << (*hand).at(i).printName();
+	}
+	std::cout << " (score: " << *score << ")\n\n";
+}
+
 void playBlackJack(Card deck[]) {
 	Card * chosenCard = new Card;
 	vector<Card> * vDeck = resetDeck(deck);
@@ -147,17 +158,8 @@ void playBlackJack(Card deck[]) {
 
 	std::cout << "House hand: " << (*houseHand).at(0).printName();
 	std::cout << ", ??? (score: " << *houseInitScore << ")";
-	std::cout << "\nPlayer hand: ";
-
-	for(unsigned i = 0; i < (*playerHand).size(); i++) {
-		if(i != 0) {
-			std::cout << ", ";
-		}
-		std::cout << (*playerHand).at(i).printName();
-	}
-	std::cout << " (score: " << *playerScore << ")";
-	std::cout << "\n\n";
-
+	printPlayerHand(playerHand, playerScore);
+	
 	// Gameplay
 	*turn = 1;
 	*isPlayerTurn = true;
@@ -179,16 +181,7 @@ void playBlackJack(Card deck[]) {
 				std::cout << "Hit chosen\n";
 				randomCard(vDeck, chosenCard, rng);
 				dealCard(vDeck, chosenCard, playerHand, playerScore, houseInitScore, 0);
-				std::cout << "\nPlayer hand: ";
-
-				for(unsigned i = 0; i < (*playerHand).size(); i++) {
-					if(i != 0) {
-						std::cout << ", ";
-					}
-					std::cout << (*playerHand).at(i).printName();
-				}
-				std::cout << " (score: " << *playerScore << ")";
-				std::cout << "\n\n";
+				printPlayerHand(playerHand, playerScore);
 				(*turn)++;
 				break;
 			case 'T':
@@ -204,7 +197,7 @@ void playBlackJack(Card deck[]) {
 				*isPlayerTurn = false;
 				randomCard(vDeck, chosenCard, rng);
 				dealCard(vDeck, chosenCard, playerHand, playerScore, houseInitScore, 0);
-				std::cout << "\nPlayer hand: ";
+				printPlayerHand(playerHand, playerScore);
 				(*turn)++;
 				break;
 			case 'P':
@@ -227,6 +220,34 @@ void playBlackJack(Card deck[]) {
 			std::cout << "21\n";
 			(*turn)++;
 		}
+	}
+
+	while(*playerScore < 21 && *isPlayerTurn == true && *turn > 1) {
+		std::cout << "What do you want to do?\n" << "([H]it, [S]tand)" << '\n';
+		std::cin >> *option;
+		switch(*option) {
+			case 'H':
+			case 'h':
+				std::cout << "Hit chosen\n";
+				randomCard(vDeck, chosenCard, rng);
+				dealCard(vDeck, chosenCard, playerHand, playerScore, houseInitScore, 0);
+				printPlayerHand(playerHand, playerScore);
+				(*turn)++;
+				break;
+			case 'T':
+			case 't':
+				std::cout << "Stand chosen\n";
+				*isPlayerTurn = false;
+				(*turn)++;
+				break;
+			default:
+				std::cout << "Invalid option, choose again\n";
+				break;
+		}
+	}
+
+	if(*playerScore > 21) {
+		std::cout << "BUST!!\n\n";
 	}
 
 	// Debug listing remaining cards in deck
